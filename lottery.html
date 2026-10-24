@@ -91,7 +91,7 @@
       <li><b>Paste the list of entries into Step 1.</b> In the tracker's "Responses" tab, copy the “Response IDs” of this round's valid entries (sort by start date/time from earliest to latest) and paste them into the box in Step 1 below. Check the round number and group size. Note that list order will affect lottery draw results; only the same list in the same order will generate the same "pool fingerprint" (a unique ID for the list of entries).</li>
       <li><b>Get the seed and paste it into Step 2.</b> A public "seed" can be anything from external sources, such as California Powerball numbers <a href="https://www.calottery.com/en/draw-games" target="_blank" rel="noopener">www.calottery.com</a>.</li>
       <li><b>Record the winners.</b> The winners appear in Step 3. Click "Copy for Draw Log" and paste into the tracker. Then click "Copy draw record" and save a copy.</li>
-      <li><b>Let anyone check.</b> Anyone who pastes the same list and the same seed into this page, or runs the R code at the bottom, gets exactly the same winners.</li>
+      <li><b>Replicability.</b> Anyone who pastes the same list and the same seed into this page, or runs the R code at the bottom, gets exactly the same winners.</li>
     </ol>
     </section>
 
@@ -144,11 +144,11 @@
 <section aria-labelledby="sld-h-how">
     <h2 id="sld-h3">How winner is picked randomly?</h2>
     <ul class="sld-how">
-      <li><b>Unique mix.</b> Four things are combined: the seed, the list's fingerprint, the round number, and the group number. They are fed into a digital "shuffler" called SHA-256, a standard also used in banking and security. The same input always gives the same result, but changing even one letter gives a completely different result, and no one can predict the result.</li>
-      <li><b>Random number.</b> The SHA-256 transforms the unique mix into a very large number. Divide the number by 10 and keep only the remainder, which is a number from 0 to 9. Add 1 to the number; that leaves us with a simple number from 1 to 10.</li>
+      <li><b>Unique mix.</b> Four things are combined: the list's fingerprint, the seed, the lottery round number, and the group number.</li>
+      <li><b>Random number.</b> The SHA-256 (a standard also used in banking and security) transforms the unique mix into a very large number. Divide the number by 10 and keep only the remainder, which is a number from 0 to 9. Add 1 to the number; that leaves us with a simple number from 1 to 10. The same input always gives the same result, but changing even one letter gives a completely different result.</li>
       <li><b>Pick.</b> That number is the winner's place in the group. If it's 9, the 9th entry in that group wins.</li>
     </ul>
-    <p><b>Why this is random:</b> The public "seed" is based on public information published by an outside organization; anyone can repeat it and get the same answer with the same list.</p>
+    <p><b>Why this is random:</b> The randomness largely comes from the "public seed," which is based on public information published by an external organization.</p>
     <div class="sld-flow" aria-label="How a winner is picked">
       <span class="sld-node">List fingerprint</span><span class="sld-plus">+</span>
       <span class="sld-node">Seed</span><span class="sld-plus">+</span>
