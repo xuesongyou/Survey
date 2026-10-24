@@ -97,28 +97,7 @@
       <li><b>Record the winners.</b> The winners appear in Step 3. Click "Copy for Draw Log" and paste into the tracker. Then click "Copy draw record" and share it with the team.</li>
       <li><b>Let anyone check.</b> Anyone who pastes the same list and the same seed into this page, or runs the R code at the bottom, gets exactly the same winners.</li>
     </ol>
-
-    <h3 class="sld-h3">What the seed does</h3>
-    <p>Think of the seed as a dice roll that everyone can watch. It's a random code published by an outside organization at a time we name in advance, so nobody can choose it or know it early. The page uses it like this for each group of 10:</p>
-    <div class="sld-flow" aria-label="How a winner is picked">
-      <span class="sld-node">Seed</span><span class="sld-plus">+</span>
-      <span class="sld-node">List fingerprint</span><span class="sld-plus">+</span>
-      <span class="sld-node">Round</span><span class="sld-plus">+</span>
-      <span class="sld-node">Group</span>
-      <span class="sld-arrow">→</span><span class="sld-node sld-node-key">Scrambler</span>
-      <span class="sld-arrow">→</span><span class="sld-node">Very large number</span>
-      <span class="sld-arrow">→</span><span class="sld-node">Number from 1 to 10</span>
-      <span class="sld-arrow">→</span><span class="sld-node sld-node-win">Winner</span>
-    </div>
-    <ul class="sld-how">
-      <li><b>Mix.</b> The page joins four things: the seed, the list's fingerprint, the round number and the group number.</li>
-      <li><b>Scramble.</b> It runs them through a "scrambler" called SHA-256, a standard also used in banking and security. The same input always gives the same result, but changing even one letter gives a completely different result, and nobody can predict the result ahead of time.</li>
-      <li><b>Count off.</b> The result is a very large number. The page divides it by 10 and keeps the remainder (0 to 9), then adds 1. That gives a number from 1 to 10.</li>
-      <li><b>Pick.</b> That number is the winner's place in the group. If it's 9, the 9th entry in that group wins.</li>
-    </ul>
-    <p><b>Why this is fair:</b> every place in the group has the same chance. The organizer can't steer the result, because the list is locked before the seed exists and the seed can't be chosen. And because it's simple arithmetic on public information, anyone can repeat it and get the same answer.</p>
-    <p class="sld-hint">What's the fingerprint? It's a short code worked out from the list of entries, like a seal on an envelope. If anyone adds, removes or reorders even one entry, the fingerprint changes completely.</p>
-  </section>
+    </section>
 
   <section aria-labelledby="sld-h-pool">
     <h2 id="sld-h-pool"><span class="sld-step">1</span>Freeze the pool</h2>
@@ -166,6 +145,29 @@
     <span class="sld-hint">"Copy for Draw Log" pastes Round, Group # and Drawn number into the tracker. "Copy draw record" gives a plain-text summary (seed, fingerprint, winners) to post for the team.</span>
   </section>
 
+<section aria-labelledby="sld-h-how">
+    <h2 id="sld-h3">What the seed does</h2>
+    <p>Think of the seed as a dice roll that everyone can watch. It's a random code published by an outside organization at a time we name in advance, so nobody can choose it or know it early. The page uses it like this for each group of 10:</p>
+    <div class="sld-flow" aria-label="How a winner is picked">
+      <span class="sld-node">Seed</span><span class="sld-plus">+</span>
+      <span class="sld-node">List fingerprint</span><span class="sld-plus">+</span>
+      <span class="sld-node">Round</span><span class="sld-plus">+</span>
+      <span class="sld-node">Group</span>
+      <span class="sld-arrow">→</span><span class="sld-node sld-node-key">Scrambler</span>
+      <span class="sld-arrow">→</span><span class="sld-node">Very large number</span>
+      <span class="sld-arrow">→</span><span class="sld-node">Number from 1 to 10</span>
+      <span class="sld-arrow">→</span><span class="sld-node sld-node-win">Winner</span>
+    </div>
+    <ul class="sld-how">
+      <li><b>Mix.</b> The page joins four things: the seed, the list's fingerprint, the round number and the group number.</li>
+      <li><b>Scramble.</b> It runs them through a "scrambler" called SHA-256, a standard also used in banking and security. The same input always gives the same result, but changing even one letter gives a completely different result, and nobody can predict the result ahead of time.</li>
+      <li><b>Count off.</b> The result is a very large number. The page divides it by 10 and keeps the remainder (0 to 9), then adds 1. That gives a number from 1 to 10.</li>
+      <li><b>Pick.</b> That number is the winner's place in the group. If it's 9, the 9th entry in that group wins.</li>
+    </ul>
+    <p><b>Why this is fair:</b> every place in the group has the same chance. The organizer can't steer the result, because the list is locked before the seed exists and the seed can't be chosen. And because it's simple arithmetic on public information, anyone can repeat it and get the same answer.</p>
+    <p class="sld-hint">What's the fingerprint? It's a short code worked out from the list of entries, like a seal on an envelope. If anyone adds, removes or reorders even one entry, the fingerprint changes completely.</p>
+  </section>
+  
   <section aria-labelledby="sld-h-verify">
     <h2 id="sld-h-verify">Check it yourself</h2>
     <p>Anyone can rerun this draw in R, without using this page. Save the entry list as a text file called <code>pool.txt</code> (one Entry ID per line, same order), put it in R's working folder, then run the code below. It prints the same fingerprint and winners shown above. It uses the <code>digest</code> package; install it once with <code>install.packages("digest")</code>.</p>
