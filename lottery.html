@@ -145,7 +145,7 @@
     <h2 id="sld-h3">How winner is picked randomly?</h2>
     <ul class="sld-how">
       <li><b>Unique mix.</b> Four things are combined: the seed, the list's fingerprint, the round number, and the group number. They are fed into a digital "shuffler" called SHA-256, a standard also used in banking and security. The same input always gives the same result, but changing even one letter gives a completely different result, and no one can predict the result.</li>
-      <li><b>Random number.</b> The SHA-256 transforms the unique mix into a very large number. Divide the number by 10 and keep only the remainder, which is a random number from 0 to 9. Add 1 to the number; that leaves us with a simple number from 1 to 10.</li>
+      <li><b>Random number.</b> The SHA-256 transforms the unique mix into a very large number. Divide the number by 10 and keep only the remainder, which is a number from 0 to 9. Add 1 to the number; that leaves us with a simple number from 1 to 10.</li>
       <li><b>Pick.</b> That number is the winner's place in the group. If it's 9, the 9th entry in that group wins.</li>
     </ul>
     <p><b>Why this is random:</b> The public "seed" is based on public information published by an outside organization; anyone can repeat it and get the same answer with the same list.</p>
