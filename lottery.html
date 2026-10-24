@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seeded Lottery Draw</title>
+<!-- Optional web fonts. Safe to delete this line: the tool falls back to system fonts. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Seeded Lottery Draw. All styles are scoped to .sld so they don't affect the host page. */
+.sld{
+  --bg:#f6f8f9; --surface:#ffffff; --fg:#17232b; --muted:#5a6b75; --line:#d9e2e6;
+  --accent:#0f6e7a; --accent-soft:#e3f1f2; --win:#1d7a46; --win-soft:#e4f4ea; --warn:#8a5a00; --warn-soft:#fbf1dc;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:"Public Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding:32px 16px 56px;box-sizing:border-box;
+}
+@media (prefers-color-scheme: dark){
+  .sld:not(.sld-light){
+    --bg:#10181d; --surface:#172229; --fg:#e4ecef; --muted:#93a5ae; --line:#2a3a43;
+    --accent:#5cc3cf; --accent-soft:#163a40; --win:#6fd39b; --win-soft:#173627; --warn:#f0c068; --warn-soft:#3a2e15;
+    color-scheme:dark;
+  }
+}
+.sld *,.sld *::before,.sld *::after{box-sizing:border-box}
+.sld [hidden]{display:none!important}
+.sld .sld-wrap{max-width:880px;margin:0 auto;display:grid;gap:28px}
+.sld h1,.sld h2{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15;color:var(--fg)}
+.sld h1{font-size:2rem}
+.sld h2{font-size:1.2rem;display:flex;align-items:baseline;gap:10px}
+.sld .sld-step{font-family:var(--mono);font-size:.8rem;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 6px}
+.sld p{margin:0;max-width:68ch}
+.sld code{font-family:var(--mono);font-size:.88em}
+.sld .sld-lede{color:var(--muted)}
+.sld .sld-example{display:inline-block;background:var(--warn-soft);color:var(--warn);font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
+.sld section{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:20px;display:grid;gap:14px;min-width:0}
+.sld .sld-row{display:flex;flex-wrap:wrap;gap:14px}
+.sld .sld-field{display:grid;gap:6px;flex:1 1 160px;min-width:0}
+.sld label,.sld .sld-label{font-size:.78rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.sld input,.sld textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:9px 10px;width:100%;margin:0}
+.sld textarea{font-family:var(--mono);font-size:.85rem;min-height:170px;resize:vertical}
+.sld input:focus-visible,.sld textarea:focus-visible,.sld button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sld .sld-hint{font-size:.85rem;color:var(--muted)}
+.sld .sld-hash{font-family:var(--mono);font-size:.82rem;word-break:break-all;background:var(--accent-soft);color:var(--fg);padding:10px 12px;border-radius:6px}
+.sld .sld-stats{display:flex;flex-wrap:wrap;gap:8px}
+.sld .sld-chip{font-size:.85rem;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-variant-numeric:tabular-nums}
+.sld .sld-chip b{font-weight:600}
+.sld .sld-tablebox{overflow-x:auto}
+.sld table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.9rem}
+.sld th{font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;background:none}
+.sld td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--fg);background:none}
+.sld td.sld-mono{font-family:var(--mono);font-size:.78rem;color:var(--muted);word-break:break-all;min-width:180px}
+.sld .sld-winner{font-weight:600;color:var(--win);background:var(--win-soft);padding:2px 8px;border-radius:4px;white-space:nowrap}
+.sld .sld-num{font-family:var(--mono);font-weight:500}
+.sld button{font:inherit;font-weight:600;cursor:pointer;border-radius:6px;padding:8px 14px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);margin:0}
+.sld button.sld-ghost{background:transparent;color:var(--accent)}
+.sld .sld-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sld .sld-toast{font-size:.85rem;color:var(--win)}
+.sld .sld-carry{font-family:var(--mono);font-size:.82rem;color:var(--warn)}
+.sld pre{margin:0;font-family:var(--mono);font-size:.8rem;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:12px;overflow-x:auto;line-height:1.5;white-space:pre}
+.sld ol.sld-how{margin:0;padding-left:20px;display:grid;gap:6px;max-width:68ch}
+.sld .sld-err{color:var(--warn);font-weight:600}
+.sld .sld-h3{font-family:var(--display);font-size:1rem;margin:6px 0 0;color:var(--fg)}
+.sld ul.sld-how{margin:0;padding-left:20px;display:grid;gap:6px;max-width:68ch}
+.sld .sld-flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px}
+.sld .sld-node{font-size:.85rem;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:4px 10px;white-space:nowrap}
+.sld .sld-node-key{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.sld .sld-node-win{background:var(--win-soft);border-color:var(--win);color:var(--win)}
+.sld .sld-plus,.sld .sld-arrow{color:var(--muted);font-weight:600}
+</style>
+</head>
+<body style="margin:0">
+
+<div class="sld" id="sld-root">
+<div class="sld-wrap">
+  <header style="display:grid;gap:10px">
+    <h1>Seeded Lottery Draw</h1>
+    <p class="sld-lede">Pick one winner from each group of 10 using a public seed. Anyone with the same entry list and seed gets exactly the same winners, so the draw can be checked independently.</p>
+    <div class="sld-actions">
+      <span class="sld-example" id="sld-exampleTag">Example data loaded — replace with your own</span>
+      <button class="sld-ghost" id="sld-clear" type="button">Clear</button>
+      <button class="sld-ghost" id="sld-loadExample" type="button">Load example</button>
+    </div>
+  </header>
+
+  <section aria-labelledby="sld-h-how">
+    <h2 id="sld-h-how">How the draw stays fair</h2>
+
+    <h3 class="sld-h3">Steps to run a draw</h3>
+    <ol class="sld-how">
+      <li><b>Announce where the seed will come from.</b> A few days before the draw, tell the team the exact source and time. For example: "The seed will be the NIST Randomness Beacon value published at 12:00 noon ET on November 20." Nobody, including the organizer, can know that value in advance.</li>
+      <li><b>Paste the list of entries.</b> In the tracker's Responses tab, copy the Entry IDs of this round's valid entries, top to bottom, and paste them into the box in Step 1 below. Check the round number and group size.</li>
+      <li><b>Lock the list before the seed comes out.</b> Click "Copy fingerprint" and send it to the team by email or chat <i>before</i> the announced time. This proves the list wasn't changed later.</li>
+      <li><b>Get the seed.</b> After the announced time, open <a href="https://beacon.nist.gov" target="_blank" rel="noopener">beacon.nist.gov</a>, find the value for that exact time (it's a long code of letters and numbers), copy it, and paste it into Step 2.</li>
+      <li><b>Record the winners.</b> The winners appear in Step 3. Click "Copy for Draw Log" and paste into the tracker. Then click "Copy draw record" and share it with the team.</li>
+      <li><b>Let anyone check.</b> Anyone who pastes the same list and the same seed into this page, or runs the R code at the bottom, gets exactly the same winners.</li>
+    </ol>
+
+    <h3 class="sld-h3">What the seed does</h3>
+    <p>Think of the seed as a dice roll that everyone can watch. It's a random code published by an outside organization at a time we name in advance, so nobody can choose it or know it early. The page uses it like this for each group of 10:</p>
+    <div class="sld-flow" aria-label="How a winner is picked">
+      <span class="sld-node">Seed</span><span class="sld-plus">+</span>
+      <span class="sld-node">List fingerprint</span><span class="sld-plus">+</span>
+      <span class="sld-node">Round</span><span class="sld-plus">+</span>
+      <span class="sld-node">Group</span>
+      <span class="sld-arrow">→</span><span class="sld-node sld-node-key">Scrambler</span>
+      <span class="sld-arrow">→</span><span class="sld-node">Very large number</span>
+      <span class="sld-arrow">→</span><span class="sld-node">Number from 1 to 10</span>
+      <span class="sld-arrow">→</span><span class="sld-node sld-node-win">Winner</span>
+    </div>
+    <ul class="sld-how">
+      <li><b>Mix.</b> The page joins four things: the seed, the list's fingerprint, the round number and the group number.</li>
+      <li><b>Scramble.</b> It runs them through a "scrambler" called SHA-256, a standard also used in banking and security. The same input always gives the same result, but changing even one letter gives a completely different result, and nobody can predict the result ahead of time.</li>
+      <li><b>Count off.</b> The result is a very large number. The page divides it by 10 and keeps the remainder (0 to 9), then adds 1. That gives a number from 1 to 10.</li>
+      <li><b>Pick.</b> That number is the winner's place in the group. If it's 9, the 9th entry in that group wins.</li>
+    </ul>
+    <p><b>Why this is fair:</b> every place in the group has the same chance. The organizer can't steer the result, because the list is locked before the seed exists and the seed can't be chosen. And because it's simple arithmetic on public information, anyone can repeat it and get the same answer.</p>
+    <p class="sld-hint">What's the fingerprint? It's a short code worked out from the list of entries, like a seal on an envelope. If anyone adds, removes or reorders even one entry, the fingerprint changes completely.</p>
+  </section>
+
+  <section aria-labelledby="sld-h-pool">
+    <h2 id="sld-h-pool"><span class="sld-step">1</span>Freeze the pool</h2>
+    <div class="sld-row">
+      <div class="sld-field" style="flex:0 1 120px"><label for="sld-round">Round</label><input id="sld-round" type="number" min="1" value="1"></div>
+      <div class="sld-field" style="flex:0 1 140px"><label for="sld-gsize">Group size</label><input id="sld-gsize" type="number" min="2" value="10"></div>
+    </div>
+    <div class="sld-field">
+      <label for="sld-pool">Entry IDs, one per line, in pool order</label>
+      <textarea id="sld-pool" spellcheck="false"></textarea>
+      <span class="sld-hint">Copy the Entry ID column from the tracker's Responses tab for this round's valid entries (Status "Round N · Group …" or "Carry over"), top to bottom. Blank lines are ignored.</span>
+    </div>
+    <div class="sld-stats" id="sld-stats"></div>
+    <div class="sld-field">
+      <span class="sld-label">Pool fingerprint (SHA-256)</span>
+      <div class="sld-hash" id="sld-fp">—</div>
+    </div>
+    <div class="sld-actions"><button class="sld-ghost" id="sld-copyFp" type="button">Copy fingerprint</button><span class="sld-toast" id="sld-fpToast" aria-live="polite"></span></div>
+  </section>
+
+  <section aria-labelledby="sld-h-seed">
+    <h2 id="sld-h-seed"><span class="sld-step">2</span>Enter the public seed</h2>
+    <div class="sld-field">
+      <label for="sld-seed">Seed (exactly as published)</label>
+      <input id="sld-seed" type="text" spellcheck="false" autocomplete="off">
+      <span class="sld-hint">Copy it character for character. Spaces and capitals matter.</span>
+    </div>
+  </section>
+
+  <section aria-labelledby="sld-h-res">
+    <h2 id="sld-h-res"><span class="sld-step">3</span>Winners</h2>
+    <div id="sld-resultMsg" class="sld-hint"></div>
+    <div class="sld-tablebox">
+      <table>
+        <thead><tr><th>Round</th><th>Group</th><th>Entries</th><th>Drawn number</th><th>Winning entry</th><th>Hash used</th></tr></thead>
+        <tbody id="sld-tbody"></tbody>
+      </table>
+    </div>
+    <div id="sld-carry"></div>
+    <div class="sld-actions">
+      <button id="sld-copyTsv" type="button">Copy for Draw Log</button>
+      <button class="sld-ghost" id="sld-copyRecord" type="button">Copy draw record</button>
+      <span class="sld-toast" id="sld-tsvToast" aria-live="polite"></span>
+    </div>
+    <span class="sld-hint">"Copy for Draw Log" pastes Round, Group # and Drawn number into the tracker. "Copy draw record" gives a plain-text summary (seed, fingerprint, winners) to post for the team.</span>
+  </section>
+
+  <section aria-labelledby="sld-h-verify">
+    <h2 id="sld-h-verify">Check it yourself</h2>
+    <p>Anyone can rerun this draw in R, without using this page. Save the entry list as a text file called <code>pool.txt</code> (one Entry ID per line, same order), put it in R's working folder, then run the code below. It prints the same fingerprint and winners shown above. It uses the <code>digest</code> package; install it once with <code>install.packages("digest")</code>.</p>
+    <pre id="sld-py"></pre>
+    <div class="sld-actions"><button class="sld-ghost" id="sld-copyPy" type="button">Copy R code</button><span class="sld-toast" id="sld-pyToast" aria-live="polite"></span></div>
+  </section>
+</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var SAMPLE_POOL = ["R_0001","R_0002","R_0003","R_0005","R_0006","R_0007","R_0008","R_0010","R_0011","R_0012","R_0013","R_0014","R_0015","R_0016","R_0017","R_0018","R_0019","R_0020","R_0021","R_0022","R_0023","R_0024","R_0025","R_0026"].join("\n");
+  var SAMPLE_SEED = "EXAMPLE seed 4b2f9e61";
+  function $(id){ return document.getElementById("sld-" + id); }
+
+  async function sha256hex(text){
+    var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
+  }
+  function parsePool(t){ return t.split(/\r?\n/).map(function(s){ return s.trim(); }).filter(Boolean); }
+  function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+  var state = { rows: [], fp: "", carry: [], round: 1, size: 10, seed: "", total: 0 };
+  var runId = 0;
+
+  async function run(){
+    var my = ++runId;
+    var ids = parsePool($("pool").value);
+    var round = parseInt($("round").value, 10);
+    var size = parseInt($("gsize").value, 10);
+    var seed = $("seed").value;
+    var rows = [], html = "";
+    $("carry").innerHTML = "";
+    if(!window.crypto || !crypto.subtle){
+      $("resultMsg").innerHTML = '<span class="sld-err">SHA-256 isn\'t available here. Open this page over https:// (or use the R code below).</span>';
+      return;
+    }
+    if(!(round >= 1) || !(size >= 2)){
+      $("resultMsg").innerHTML = '<span class="sld-err">Enter a round of 1 or more and a group size of 2 or more.</span>';
+      $("tbody").innerHTML = ""; return;
+    }
+    var full = Math.floor(ids.length / size), left = ids.length - full * size;
+    var dupes = ids.filter(function(v,i){ return ids.indexOf(v) !== i; });
+    $("stats").innerHTML = '<span class="sld-chip"><b>' + ids.length + '</b> entries</span>' +
+      '<span class="sld-chip"><b>' + full + '</b> full groups = winners</span>' +
+      '<span class="sld-chip"><b>' + left + '</b> carry over</span>' +
+      (dupes.length ? '<span class="sld-chip sld-err">Duplicate IDs: ' + esc(Array.from(new Set(dupes)).join(", ")) + '</span>' : "");
+    var fp = ids.length ? await sha256hex(ids.join("\n")) : "";
+    if(my !== runId) return;
+    $("fp").textContent = fp || "—";
+    updatePy(round, size, seed);
+    state = { rows: [], fp: fp, carry: [], round: round, size: size, seed: seed, total: ids.length };
+    if(!ids.length){ $("resultMsg").textContent = "Paste the entry IDs to see the groups."; $("tbody").innerHTML = ""; return; }
+    if(!seed.trim()){ $("resultMsg").textContent = "Waiting for the seed. Share the fingerprint first, then enter the seed once it's public."; $("tbody").innerHTML = ""; return; }
+    $("resultMsg").textContent = full ? ("Round " + round + ": " + full + " winner" + (full > 1 ? "s" : "") + " drawn from " + (full * size) + " entries.")
+                                      : ("Fewer than " + size + " entries, so there is no full group to draw this round.");
+    for(var g = 1; g <= full; g++){
+      var h = await sha256hex(seed + "|" + fp + "|round " + round + "|group " + g);
+      if(my !== runId) return;
+      var n = Number(BigInt("0x" + h) % BigInt(size)) + 1;
+      var start = (g - 1) * size, win = ids[start + n - 1];
+      rows.push({ round: round, group: g, n: n, win: win, hash: h });
+      html += "<tr><td>" + round + "</td><td>" + g + '</td><td class="sld-num">' + esc(ids[start]) + " – " + esc(ids[start + size - 1]) +
+              '</td><td class="sld-num">' + n + '</td><td><span class="sld-winner">' + esc(win) + '</span></td><td class="sld-mono">' + h + "</td></tr>";
+    }
+    $("tbody").innerHTML = html;
+    state.rows = rows; state.carry = ids.slice(full * size);
+    if(left) $("carry").innerHTML = '<p class="sld-hint">Carry over to round ' + (round + 1) + ': <span class="sld-carry">' + esc(state.carry.join(", ")) + '</span></p>';
+  }
+
+  function updatePy(round, size, seed){
+    var s = JSON.stringify(seed || "PASTE THE SEED HERE");
+    $("py").textContent =
+'# Seeded Lottery Draw: check the results yourself\n' +
+'# One-time setup: install.packages("digest")\n' +
+'library(digest)\n\n' +
+'SEED       <- ' + s + '\n' +
+'ROUND      <- ' + round + '\n' +
+'GROUP_SIZE <- ' + size + '\n\n' +
+'# pool.txt: one Entry ID per line, in pool order\n' +
+'ids <- trimws(readLines("pool.txt", encoding = "UTF-8", warn = FALSE))\n' +
+'ids <- ids[ids != ""]\n\n' +
+'# SHA-256 of a piece of text\n' +
+'sha256 <- function(text) digest(enc2utf8(text), algo = "sha256", serialize = FALSE)\n\n' +
+'# Remainder after dividing a very large (hexadecimal) number by m,\n' +
+'# worked out one digit at a time so R never loses precision\n' +
+'hex_mod <- function(hex, m) {\n' +
+'  r <- 0\n' +
+'  for (d in strsplit(hex, "")[[1]]) r <- (r * 16 + strtoi(d, 16L)) %% m\n' +
+'  r\n' +
+'}\n\n' +
+'fingerprint <- sha256(paste(ids, collapse = "\\n"))\n' +
+'cat("Pool fingerprint:", fingerprint, "\\n\\n")\n\n' +
+'n_groups <- length(ids) %/% GROUP_SIZE\n' +
+'for (g in seq_len(n_groups)) {\n' +
+'  msg    <- paste0(SEED, "|", fingerprint, "|round ", ROUND, "|group ", g)\n' +
+'  n      <- hex_mod(sha256(msg), GROUP_SIZE) + 1\n' +
+'  winner <- ids[(g - 1) * GROUP_SIZE + n]\n' +
+'  cat(sprintf("Round %d, group %d: drawn number %d -> %s\\n", ROUND, g, n, winner))\n' +
+'}\n\n' +
+'left <- ids[seq_along(ids) > n_groups * GROUP_SIZE]\n' +
+'cat("Carry over:", if (length(left)) paste(left, collapse = ", ") else "none", "\\n")';
+  }
+
+  function toast(id, msg){ $(id).textContent = msg; setTimeout(function(){ $(id).textContent = ""; }, 2500); }
+  async function copy(text, toastId, el){
+    try{ await navigator.clipboard.writeText(text); toast(toastId, "Copied"); }
+    catch(e){
+      var r = document.createRange(); r.selectNodeContents(el);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      toast(toastId, "Selected — press Ctrl/Cmd+C to copy");
+    }
+  }
+
+  $("copyFp").addEventListener("click", function(){ copy($("fp").textContent, "fpToast", $("fp")); });
+  $("copyPy").addEventListener("click", function(){ copy($("py").textContent, "pyToast", $("py")); });
+  $("copyTsv").addEventListener("click", function(){
+    if(!state.rows.length){ toast("tsvToast", "No winners yet"); return; }
+    copy(state.rows.map(function(r){ return [r.round, r.group, r.n].join("\t"); }).join("\n"), "tsvToast", $("tbody"));
+  });
+  $("copyRecord").addEventListener("click", function(){
+    if(!state.rows.length){ toast("tsvToast", "No winners yet"); return; }
+    var lines = [
+      "Lottery draw record — round " + state.round,
+      "Entries in pool: " + state.total + " (group size " + state.size + ")",
+      "Pool fingerprint (SHA-256): " + state.fp,
+      "Seed: " + state.seed,
+      "Method: SHA-256(seed|fingerprint|round R|group G), drawn number = hash mod group size + 1",
+      ""
+    ].concat(state.rows.map(function(r){ return "Group " + r.group + ": drawn number " + r.n + " -> " + r.win; }))
+     .concat(["", "Carry over: " + (state.carry.join(", ") || "none")]);
+    copy(lines.join("\n"), "tsvToast", $("tbody"));
+  });
+
+  function loadExample(){ $("pool").value = SAMPLE_POOL; $("seed").value = SAMPLE_SEED; $("round").value = 1; $("gsize").value = 10; $("exampleTag").hidden = false; run(); }
+  $("loadExample").addEventListener("click", loadExample);
+  $("clear").addEventListener("click", function(){ $("pool").value = ""; $("seed").value = ""; $("exampleTag").hidden = true; run(); $("pool").focus(); });
+
+  var t;
+  ["pool","round","gsize","seed"].forEach(function(id){
+    $(id).addEventListener("input", function(){
+      if($("pool").value !== SAMPLE_POOL || $("seed").value !== SAMPLE_SEED) $("exampleTag").hidden = true;
+      clearTimeout(t); t = setTimeout(run, 150);
+    });
+  });
+  loadExample();
+})();
+</script>
+</body>
+</html>
