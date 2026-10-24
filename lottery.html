@@ -143,12 +143,12 @@
 
 <section aria-labelledby="sld-h-how">
     <h2 id="sld-h3">How winner is picked randomly?</h2>
+  <p>The randomness largely comes from the "public seed," which is based on public information published by an external organization.</p>
     <ul class="sld-how">
       <li><b>Unique mix.</b> Four things are combined into a unique mix: the list's fingerprint, the seed, the lottery round number, and the group number.</li>
       <li><b>Random number.</b> The SHA-256 (a standard also used in banking and security) transforms the unique mix into a very large number. Divide the number by 10 and keep only the remainder, which is a number from 0 to 9. Add 1 to the number; that leaves us with a simple number from 1 to 10. The same input always gives the same result, but changing even one letter gives a completely different result.</li>
       <li><b>Pick the winner.</b> That number is the winner's place in the group. If it's 9, the 9th entry in that group wins.</li>
     </ul>
-    <p><b>Why this is random:</b> The randomness largely comes from the "public seed," which is based on public information published by an external organization.</p>
     <div class="sld-flow" aria-label="How a winner is picked">
       <span class="sld-node">List fingerprint</span><span class="sld-plus">+</span>
       <span class="sld-node">Seed</span><span class="sld-plus">+</span>
